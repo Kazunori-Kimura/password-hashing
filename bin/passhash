@@ -1,0 +1,85 @@
+#!/usr/bin/env node
+/**
+ * password-hashing CLI
+ * (c) 2015, Kazunori-Kimura
+ */
+"use strict";
+
+process.bin = process.title = "passhash";
+
+var PassHash = require("../");
+var commander = require("commander");
+var pckg = require("../package.json");
+
+commander.version(pckg.version);
+
+commander
+  .command("digest <password>")
+  .description("パスワードからハッシュを取得します。")
+  .option("-A, --algorithm <value>", "ハッシュアルゴリズムを指定します。デフォルト:'sha1'")
+  .option("-E, --encoding <value>", "エンコードを指定します(binary,hex,base64)。デフォルト:'hex'")
+  .option("-S, --salt <value>", "パスワードに付与するsaltを指定します。")
+  .option("-s, --stretching <n>", "ストレッチング回数を指定します。デフォルト:1000", parseInt)
+  .action((password, options) => {
+    // password hashing
+    let params = extendParameters(options);
+    let passhash = new PassHash(params);
+    let hash = passhash.digest(password);
+
+    // output
+    const message = `password: ${password}
+hash: ${hash}
+`;
+    console.log(message);
+  });
+
+commander
+  .command("verify <password> <hash>")
+  .description("パスワードとハッシュが一致しているかチェックします。")
+  .option("-A, --algorithm <value>", "ハッシュアルゴリズムを指定します。デフォルト:'sha1'")
+  .option("-E, --encoding <value>", "エンコードを指定します(binary,hex,base64)。デフォルト:'hex'")
+  .option("-S, --salt <value>", "パスワードに付与するsaltを指定します。")
+  .option("-s, --stretching <n>", "ストレッチング回数を指定します。デフォルト:1000", parseInt)
+  .action((password, hash, options) => {
+    // password hashing
+    let params = extendParameters(options);
+    let passhash = new PassHash(params);
+    let calchash = passhash.digest(password);
+    let valid = passhash.verify(password, hash);
+    // output
+    const message = `password: ${password} => hash: ${calchash}
+入力されたhash: ${hash}
+
+検証結果: ${valid}
+`;
+
+    console.log(message);
+  });
+
+commander
+  .command("list")
+  .description("サポートされているハッシュアルゴリズムを表示します。")
+  .action(() => {
+    let passhash = new PassHash();
+    console.log([...passhash.list()].join(","));
+  });
+
+commander.parse(process.argv);
+
+
+function extendParameters(options) {
+  var params = {};
+  if (options.algorithm) {
+    params.algorithm = options.algorithm;
+  }
+  if (options.encoding) {
+    params.encoding = options.encoding;
+  }
+  if (options.salt) {
+    params.salt = options.salt;
+  }
+  if (options.stretching) {
+    params.stretching = options.stretching;
+  }
+  return params;
+}
