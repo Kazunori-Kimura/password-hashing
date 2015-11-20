@@ -6,6 +6,9 @@
   "scripts": {
     "test": "mocha"
   },
+  "directories": {
+    "test": "test/"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Kazunori-Kimura/password-hashing.git"

@@ -21,16 +21,20 @@ commander
   .option("-S, --salt <value>", "パスワードに付与するsaltを指定します。")
   .option("-s, --stretching <n>", "ストレッチング回数を指定します。デフォルト:1000", parseInt)
   .action((password, options) => {
-    // password hashing
-    let params = extendParameters(options);
-    let passhash = new PassHash(params);
-    let hash = passhash.digest(password);
+    try {
+      // password hashing
+      let params = extendParameters(options);
+      let passhash = new PassHash(params);
+      let hash = passhash.digest(password);
 
-    // output
-    const message = `password: ${password}
+      // output
+      const message = `password: ${password}
 hash: ${hash}
 `;
-    console.log(message);
+      console.log(message);
+    } catch (err) {
+      console.log(err.message);
+    }
   });
 
 commander
@@ -41,19 +45,22 @@ commander
   .option("-S, --salt <value>", "パスワードに付与するsaltを指定します。")
   .option("-s, --stretching <n>", "ストレッチング回数を指定します。デフォルト:1000", parseInt)
   .action((password, hash, options) => {
-    // password hashing
-    let params = extendParameters(options);
-    let passhash = new PassHash(params);
-    let calchash = passhash.digest(password);
-    let valid = passhash.verify(password, hash);
-    // output
-    const message = `password: ${password} => hash: ${calchash}
-入力されたhash: ${hash}
+    try {
+      // password hashing
+      let params = extendParameters(options);
+      let passhash = new PassHash(params);
+      let valid = passhash.verify(password, hash);
+      // output
+      const message = `password: ${password}
+hash: ${hash}
 
 検証結果: ${valid}
 `;
 
-    console.log(message);
+      console.log(message);
+    } catch (err) {
+      console.log(err.message);
+    }
   });
 
 commander
