@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "password hashing",
   "main": "index.js",
+  "bin": {
+    "passhash": "bin/passhash"
+  },
   "scripts": {
     "test": "mocha"
   },
