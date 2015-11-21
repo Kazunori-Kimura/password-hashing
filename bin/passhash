@@ -20,6 +20,7 @@ commander
   .option("-E, --encoding <value>", "エンコードを指定します(binary,hex,base64)。デフォルト:'hex'")
   .option("-S, --salt <value>", "パスワードに付与するsaltを指定します。")
   .option("-s, --stretching <n>", "ストレッチング回数を指定します。デフォルト:1000", parseInt)
+  .option("-O, --hashonly", "ハッシュ値のみを返します。")
   .action((password, options) => {
     try {
       // password hashing
@@ -28,10 +29,7 @@ commander
       let hash = passhash.digest(password);
 
       // output
-      const message = `password: ${password}
-hash: ${hash}
-`;
-      console.log(message);
+      console.log(hash);
     } catch (err) {
       console.log(err.message);
     }
@@ -51,11 +49,7 @@ commander
       let passhash = new PassHash(params);
       let valid = passhash.verify(password, hash);
       // output
-      const message = `password: ${password}
-hash: ${hash}
-
-検証結果: ${valid}
-`;
+      const message = `検証結果: ${valid}`;
 
       console.log(message);
     } catch (err) {
@@ -68,7 +62,13 @@ commander
   .description("サポートされているハッシュアルゴリズムを表示します。")
   .action(() => {
     let passhash = new PassHash();
-    console.log([...passhash.list()].join(","));
+    // spread operatorが nodejs >= 5.x.x でした
+    //console.log([...passhash.list()].join(","));
+    var items = [];
+    passhash.list().forEach(function(item){
+      items.push(item);
+    });
+    console.log(items.join(","));
   });
 
 commander.parse(process.argv);
@@ -88,5 +88,7 @@ function extendParameters(options) {
   if (options.stretching) {
     params.stretching = options.stretching;
   }
+  params.hashonly = options.hashonly ? true : false;
+
   return params;
 }

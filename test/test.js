@@ -13,6 +13,7 @@ describe("password-hashing", function(){
 
   // 結果
   const passwordhash = "sha256,base64,100,salt,OuXr9veEcn+RMubx4hIV5UpnoZ5gv8k7N6mVelxXvd0=";
+  const hashonly = "OuXr9veEcn+RMubx4hIV5UpnoZ5gv8k7N6mVelxXvd0=";
 
   describe("#digest()", function(){
     it("オプション未指定で実行", function(){
@@ -37,6 +38,48 @@ describe("password-hashing", function(){
       });
       // テスト結果と同じ結果が返ってくる
       assert(passhash.digest(password) === passwordhash);
+    });
+
+    it("ハッシュのみを返す", function(){
+      var passhash = new PassHash({
+        algorithm,
+        encoding,
+        salt,
+        stretching,
+        hashonly: true
+      });
+      // テスト結果と同じ結果が返ってくる
+      assert(passhash.digest(password) === hashonly);
+    });
+  });
+
+  describe("#verify()", function(){
+    it("verify OK なパターン - オプションを引数で指定", function(){
+      var passhash = new PassHash({
+        algorithm,
+        encoding,
+        salt,
+        stretching
+      });
+      // trueが返ってくる
+      assert(passhash.verify(password, hashonly) === true);
+    });
+
+    it("verify OK なパターン - hashからオプションを指定", function(){
+      var passhash = new PassHash();
+      // trueが返ってくる
+      assert(passhash.verify(password, passwordhash) === true);
+    });
+
+    it("verify NG なパターン", function(){
+      var passhash = new PassHash({
+        algorithm,
+        encoding,
+        salt,
+        stretching
+      });
+      // falseが返ってくる
+      assert(passhash.verify("hoge", passwordhash) === false);
     });
   });
 
